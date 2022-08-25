@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<!-- saved from url=(0038)https://cre8mania.com/ny_virtual_show/ -->
+<html style="" class=" js flexbox canvas canvastext webgl no-touch geolocation postmessage websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers no-applicationcache svg inlinesvg smil svgclippaths"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>Virtual Show</title>   
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1,FF=3">           
+    <meta name="viewport" content="user-scalable=0, minimal-ui">
+    
+    <link rel="stylesheet" href="./Virtual Show_files/bootstrap.min.css">
+    <link rel="stylesheet" href="./Virtual Show_files/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="./Virtual Show_files/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <link rel="stylesheet" href="./Virtual Show_files/animate.min.css"> 
+    <link rel="stylesheet" href="./Virtual Show_files/style.css">
+    <link rel="stylesheet" href="./Virtual Show_files/main.css">
+    <script src="./Virtual Show_files/modernizr-2.8.3-respond-1.4.2.min.js"></script>
+    
+    <!-- Link to the last version of BabylonJS -->
+    <script src="./Virtual Show_files/babylon.js"></script>
+    <!-- Link to the last version of BabylonJS loaders to enable loading filetypes such as .gltf -->
+    <script src="./Virtual Show_files/babylonjs.loaders.min.js"></script>
+    <!-- Link to pep.js to ensure pointer events work consistently in all browsers -->
+    <script src="./Virtual Show_files/pep.js"></script><style>[touch-action="none"]{ -ms-touch-action: none; touch-action: none; touch-action-delay: none; }
+[touch-action="auto"]{ -ms-touch-action: auto; touch-action: auto; touch-action-delay: none; }
+[touch-action="pan-x"]{ -ms-touch-action: pan-x; touch-action: pan-x; touch-action-delay: none; }
+[touch-action="pan-y"]{ -ms-touch-action: pan-y; touch-action: pan-y; touch-action-delay: none; }
+[touch-action="pan-x pan-y"],[touch-action="pan-y pan-x"]{ -ms-touch-action: pan-x pan-y; touch-action: pan-x pan-y; touch-action-delay: none; }
+</style>
+    <!-- Link to BJS GUI -->
+    <script src="./Virtual Show_files/babylon.gui.min.js"></script>
+    
+    <script src="./Virtual Show_files/cannon.min.js" integrity="sha256-VOi2Rul9rvLP88evmfzQ/naNx059RkmPaKhpx9ydyQY=" crossorigin="anonymous"></script>    
+    <script src="./Virtual Show_files/jquery.min.js"></script>
+    <script src="./Virtual Show_files/jquery.zoom.js"></script>
+  
+</head>
+<body>
+    <div id="loadingScreen" style="display: none;"> </div>
+    
+    <canvas id="renderCanvas" width="1920" height="921" data-engine="Babylon.js v5.20.0" touch-action="none" tabindex="1" style="touch-action: none; -webkit-tap-highlight-color: transparent;"></canvas>    
+    <!-- <script src="./Virtual Show_files/app.js"></script> -->
+    <!-- <script src="./Virtual Show_files/babylon.file.js"></script> -->
+    
+    
+    <div id="popup" style="display: none;"><main><div class="close" id="close"></div>
+        <div class="container"><div class="row"><div class="col-md-12">
+        
+        <div class="image-box">
+        <figure class="height"><span class="zoom" id="ex1" style="position: relative; overflow: hidden;"><img id="img" src="https://cre8mania.com/ny_virtual_show/" alt="" style="visibility: visible;"></span></figure>
+        </div>
+        
+        </div>
+        </div></div>
+        <section class="desc_section"><div class="container"><div class="row"><div class="col-md-8 col-md-offset-2">
+        <div class="innder-box wow  slideInUp" data-wow-duration=".7s" data-wow-delay="0s" style="visibility: visible; animation-duration: 0.7s; animation-delay: 0s; animation-name: slideInUp;">            
+            <h1 id="h1"></h1>
+            <h5 id="h5"></h5>            
+            <h3 id="h3"></h3>
+            <div class="location" id="location"></div>
+            <article id="inner_box"></article>
+             <div id="imgpreloader"><img id="img2" src="https://cre8mania.com/ny_virtual_show/" alt=""></div>
+        </div>
+        </div></div></div></section></main></div>
+    
+   
+    
+    <div class="intro_popup" style="display: none;">
+       <div class="closeinfobtn"></div>
+        <figure>
+            <img src="./Virtual Show_files/info.png" alt="">
+        </figure>
+        
+        <div class="startbtn" id="startani">Start</div> 
+        
+    </div>
+    
+    <!--<div class="playstop play" id="playstop"></div> 
+    -->
+    <script>
+        window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')
+    </script>
+    <script src="./Virtual Show_files/bootstrap.min.js"></script>
+	<script src="./Virtual Show_files/wow.min.js"></script>
+	<script src="./Virtual Show_files/owl.carousel.min.js"></script>
+    <script src="./Virtual Show_files/main.js"></script>
+    	<script type="text/javascript">
+    new WOW().init();
+    window.addEventListener('DOMContentLoaded', ()=> {
+        var canvas = document.getElementById('renderCanvas');
+        // load the 3D engine
+        var engine = new BABYLON.Engine(canvas, true);
+
+        var createScene = function () {
+            var scene = new BABYLON.Scene(engine);
+
+            // Lights
+            var light0 = new BABYLON.DirectionalLight("Omni", new BABYLON.Vector3(-2, -5, 2), scene);
+            var light1 = new BABYLON.PointLight("Omni", new BABYLON.Vector3(2, -8, -2), scene);
+
+            // camera
+            var camera = new BABYLON.ArcRotateCamera("Camera", BABYLON.Tools.ToRadians(226), BABYLON.Tools.ToRadians(125), 100, BABYLON.Vector3.Zero(), scene);
+            camera.attachControl(canvas, true);
+
+            //Simple crate
+            var box = BABYLON.MeshBuilder.CreatePolyhedron("crate0", { type: 1 }, scene);
+
+
+                var CoT = new BABYLON.TransformNode("root"); 
+
+            camera.lockedTarget = CoT
+
+            
+
+        //Materials----------------------------------------------------------------------------------------------------------
+            //Function to build material for Gems
+            var BuildMaterial = function (MaterialName, ColourOne, ColourTwo) {
+                //Create and set up DiamondMaterialOne
+                CurrentMaterial = new BABYLON.StandardMaterial(MaterialName, scene);
+                CurrentMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+                CurrentMaterial.emissiveColor = BABYLON.Color3.White();
+                CurrentMaterial.specularPower = 60;
+                // Set up the Fresnel
+                CurrentMaterial.emissiveFresnelParameters = new BABYLON.FresnelParameters();
+                CurrentMaterial.emissiveFresnelParameters.power = 3;
+                CurrentMaterial.emissiveFresnelParameters.bias = 0.2;
+                CurrentMaterial.emissiveFresnelParameters.leftColor = ColourOne;
+                CurrentMaterial.emissiveFresnelParameters.rightColor = ColourTwo;
+                return CurrentMaterial
+            };
+
+            //Create specific material from function
+            DiamondMaterialTwo = BuildMaterial("DiamondTwoMat", BABYLON.Color3.FromInts(181, 14, 7), BABYLON.Color3.FromInts(255, 162, 101));
+            //Apply Material
+            box.material = DiamondMaterialTwo;
+            var boxContainer = [];
+
+            boxContainer[0] = box;
+
+            var myJSON = { "Gems": [{ "Vector": [10, 10, 10] }, { "Vector": [10, 30, 30] }, { "Vector": [30, 50, 50] }, { "Vector": [100, 70, 70] }, { "Vector": [180, 90, 90] }, { "Vector": [50, 110, 110] }, { "Vector": [100, 130, 130] }, { "Vector": [100, 150, 150] }, { "Vector": [280, 180, 180] }, { "Vector": [100, 210, 210] }, { "Vector": [110, 300, 300] }] }
+
+            for (i = 0; i < myJSON.Gems.length; i++) {
+                var randSize = BABYLON.Scalar.RandomRange(1, 5);
+                if (i == 0) {
+                    boxContainer[i].name = "crate" + i.toString();
+                    boxContainer[i].position.x = myJSON.Gems[i].Vector[0];
+                    boxContainer[i].position.y = myJSON.Gems[i].Vector[1];
+                    boxContainer[i].position.z = myJSON.Gems[i].Vector[2];
+                    boxContainer[i].scaling = new BABYLON.Vector3(randSize, randSize, randSize);
+                }
+                else {
+                    boxContainer[i] = boxContainer[0].createInstance("crate" + i.toString());
+                    boxContainer[i].position.x = myJSON.Gems[i].Vector[0];
+                    boxContainer[i].position.y = myJSON.Gems[i].Vector[1];
+                    boxContainer[i].position.z = myJSON.Gems[i].Vector[2];
+                    boxContainer[i].scaling = new BABYLON.Vector3(randSize, randSize, randSize);
+                }
+            };
+
+            scene.registerBeforeRender(function () {
+                //Run Through gems list and animate 
+                for (i = 0; i < boxContainer.length; i++) {
+                    boxContainer[i].rotation.y += 0.01;
+                    boxContainer[i].rotation.x += 0.0;
+                    boxContainer[i].rotation.z += 0.0;
+                }
+            })
+
+
+            camera.actionManager = new BABYLON.ActionManager(scene);
+            var obervable = scene.onPointerObservable.add(function (evt) {
+
+                var whereto = new BABYLON.Vector3(
+                    evt.pickInfo.pickedPoint.x,
+                    evt.pickInfo.pickedPoint.y,
+                    evt.pickInfo.pickedPoint.z - 30);//minus 10 to get infront of the mesh
+
+                var wheretoTwo = new BABYLON.Vector3(
+                    evt.pickInfo.pickedPoint.x,
+                    evt.pickInfo.pickedPoint.y,
+                    evt.pickInfo.pickedPoint.z);//minus 10 to get infront of the mesh
+
+                boxContainer.forEach(function (obj) {
+
+                    if (obj.name === evt.pickInfo.pickedMesh.name) {
+
+                        //http://doc.babylonjs.com/tutorials/Animations
+
+                        camera.setTarget(obj.position);
+
+                        var easingFunction = new BABYLON.BackEase(.0);
+                        easingFunction.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEIN);
+
+                        //Animation.CreateAndStartAnimation = function(name, mesh, tartgetProperty, framePerSecond, totalFrame, from, to, loopMode,easingfunction );
+                    //  var animTgt = BABYLON.Animation.CreateAndStartAnimation("anim", camera.target, "rotation", 30, 100, camera.position, whereto, 2, easingFunction);
+                        var animTwo = BABYLON.Animation.CreateAndStartAnimation("anim", CoT, "position", 300, 100, CoT.position, wheretoTwo, 2, easingFunction);
+                        var anim = BABYLON.Animation.CreateAndStartAnimation("anim", camera, "position", 30, 100, camera.position, whereto, 2, easingFunction);
+
+                        //keep tracking collision while position is updated	
+                        camera.checkCollisions = true;
+                    }
+                })
+            }, BABYLON.PointerEventTypes.POINTERDOWN)
+
+            //Set gravity for the scene (G force like, on Y-axis)
+            scene.gravity = new BABYLON.Vector3(0, -0.9, 0);
+
+            // Enable Collisions
+            scene.collisionsEnabled = true;
+
+            //Then apply collisions and gravity to the active camera
+            camera.checkCollisions = true;
+            //camera.applyGravity = true;
+
+            //Set the ellipsoid around the camera (e.g. your player's size)
+            camera.ellipsoid = new BABYLON.Vector3(1, 1, 1);
+
+
+            box.checkCollisions = true;
+
+
+            engine.runRenderLoop(function(){
+                scene.render();
+            });
+
+            
+        }
+
+        createScene()
+    })
+	</script>
+	
+	
+
+
+<input type="hidden" id="hippowiz-ass-injected" value="true"><input type="hidden" id="hvmessage-toextension-listener" value="none"></body></html>
