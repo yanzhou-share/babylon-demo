@@ -1,93 +1,32 @@
 <!DOCTYPE html>
-<!-- saved from url=(0038)https://cre8mania.com/ny_virtual_show/ -->
-<html style="" class=" js flexbox canvas canvastext webgl no-touch geolocation postmessage websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers no-applicationcache svg inlinesvg smil svgclippaths"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    
+<html class=" js flexbox canvas canvastext webgl no-touch geolocation postmessage websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers no-applicationcache svg inlinesvg smil svgclippaths"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Virtual Show</title>   
-    
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1,FF=3">           
     <meta name="viewport" content="user-scalable=0, minimal-ui">
-    
-    <link rel="stylesheet" href="./Virtual Show_files/bootstrap.min.css">
-    <link rel="stylesheet" href="./Virtual Show_files/bootstrap-theme.min.css">
-    <link rel="stylesheet" href="./Virtual Show_files/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
     <link rel="stylesheet" href="./Virtual Show_files/animate.min.css"> 
-    <link rel="stylesheet" href="./Virtual Show_files/style.css">
-    <link rel="stylesheet" href="./Virtual Show_files/main.css">
     <script src="./Virtual Show_files/modernizr-2.8.3-respond-1.4.2.min.js"></script>
-    
     <!-- Link to the last version of BabylonJS -->
     <script src="./Virtual Show_files/babylon.js"></script>
     <!-- Link to the last version of BabylonJS loaders to enable loading filetypes such as .gltf -->
     <script src="./Virtual Show_files/babylonjs.loaders.min.js"></script>
     <!-- Link to pep.js to ensure pointer events work consistently in all browsers -->
-    <script src="./Virtual Show_files/pep.js"></script><style>[touch-action="none"]{ -ms-touch-action: none; touch-action: none; touch-action-delay: none; }
-[touch-action="auto"]{ -ms-touch-action: auto; touch-action: auto; touch-action-delay: none; }
-[touch-action="pan-x"]{ -ms-touch-action: pan-x; touch-action: pan-x; touch-action-delay: none; }
-[touch-action="pan-y"]{ -ms-touch-action: pan-y; touch-action: pan-y; touch-action-delay: none; }
-[touch-action="pan-x pan-y"],[touch-action="pan-y pan-x"]{ -ms-touch-action: pan-x pan-y; touch-action: pan-x pan-y; touch-action-delay: none; }
-</style>
+    <script src="./Virtual Show_files/pep.js"></script>
+    <style>
+        [touch-action="none"]{ -ms-touch-action: none; touch-action: none; touch-action-delay: none; }
+        [touch-action="auto"]{ -ms-touch-action: auto; touch-action: auto; touch-action-delay: none; }
+        [touch-action="pan-x"]{ -ms-touch-action: pan-x; touch-action: pan-x; touch-action-delay: none; }
+        [touch-action="pan-y"]{ -ms-touch-action: pan-y; touch-action: pan-y; touch-action-delay: none; }
+        [touch-action="pan-x pan-y"],[touch-action="pan-y pan-x"]{ -ms-touch-action: pan-x pan-y; touch-action: pan-x pan-y; touch-action-delay: none; }
+    </style>
     <!-- Link to BJS GUI -->
     <script src="./Virtual Show_files/babylon.gui.min.js"></script>
     
     <script src="./Virtual Show_files/cannon.min.js" integrity="sha256-VOi2Rul9rvLP88evmfzQ/naNx059RkmPaKhpx9ydyQY=" crossorigin="anonymous"></script>    
     <script src="./Virtual Show_files/jquery.min.js"></script>
     <script src="./Virtual Show_files/jquery.zoom.js"></script>
-  
+    <script src="./Virtual Show_files/babylon.file.js"></script>
 </head>
 <body>
-    <div id="loadingScreen" style="display: none;"> </div>
-    
     <canvas id="renderCanvas" width="1920" height="921" data-engine="Babylon.js v5.20.0" touch-action="none" tabindex="1" style="touch-action: none; -webkit-tap-highlight-color: transparent;"></canvas>    
-    <!-- <script src="./Virtual Show_files/app.js"></script> -->
-    <script src="./Virtual Show_files/babylon.file.js"></script>
-    
-    
-    <div id="popup" style="display: none;"><main><div class="close" id="close"></div>
-        <div class="container"><div class="row"><div class="col-md-12">
-        
-        <div class="image-box">
-        <figure class="height"><span class="zoom" id="ex1" style="position: relative; overflow: hidden;"><img id="img" src="https://cre8mania.com/ny_virtual_show/" alt="" style="visibility: visible;"></span></figure>
-        </div>
-        
-        </div>
-        </div></div>
-        <section class="desc_section"><div class="container"><div class="row"><div class="col-md-8 col-md-offset-2">
-        <div class="innder-box wow  slideInUp" data-wow-duration=".7s" data-wow-delay="0s" style="visibility: visible; animation-duration: 0.7s; animation-delay: 0s; animation-name: slideInUp;">            
-            <h1 id="h1"></h1>
-            <h5 id="h5"></h5>            
-            <h3 id="h3"></h3>
-            <div class="location" id="location"></div>
-            <article id="inner_box"></article>
-             <div id="imgpreloader"><img id="img2" src="https://cre8mania.com/ny_virtual_show/" alt=""></div>
-        </div>
-        </div></div></div></section></main></div>
-    
-   
-    
-    <div class="intro_popup" style="display: none;">
-       <div class="closeinfobtn"></div>
-        <figure>
-            <img src="./Virtual Show_files/info.png" alt="">
-        </figure>
-        
-        <div class="startbtn" id="startani">Start</div> 
-        
-    </div>
-    
-    <!--<div class="playstop play" id="playstop"></div> 
-    -->
-    <script>
-        window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')
-    </script>
-    <script src="./Virtual Show_files/bootstrap.min.js"></script>
-	<script src="./Virtual Show_files/wow.min.js"></script>
-	<script src="./Virtual Show_files/owl.carousel.min.js"></script>
-    <script src="./Virtual Show_files/main.js"></script>
-    	<script type="text/javascript">
-    new WOW().init();
-	</script>
-	
-	
-
-
-<input type="hidden" id="hippowiz-ass-injected" value="true"><input type="hidden" id="hvmessage-toextension-listener" value="none"></body></html>
+</body>
+</html>

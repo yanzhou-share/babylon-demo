@@ -27,6 +27,7 @@ window.addEventListener('DOMContentLoaded', ()=> {
             camera = new BABYLON.FreeCamera("FreeCam", new BABYLON.Vector3(-1 , 1, 1), scene, true);
             camera.rotation.y = -Math.PI / 2
             camera.fov = 1.33
+            camera.speed = 0.5
             // camera.inputs.addMouseWheel();
             // camera.setTarget(BABYLON.Vector3.Zero());
 
