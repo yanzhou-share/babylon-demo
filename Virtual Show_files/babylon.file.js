@@ -84,6 +84,8 @@ window.addEventListener('DOMContentLoaded', ()=> {
                                 // var anim = BABYLON.Animation.CreateAndStartAnimation("anim", camera, "position", 30, 100, camera.position, whereto, 2, easingFunction);
 
                                 let targetMesh = pickInfo.pickedMesh
+
+                                console.log(targetMesh.rotationQuaternion.toEulerAngles())
                                 // camera.lockedTarget = targetMesh
                                 // return
 
