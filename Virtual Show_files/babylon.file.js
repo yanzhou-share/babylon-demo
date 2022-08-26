@@ -18,8 +18,8 @@ window.addEventListener('DOMContentLoaded', ()=> {
         // Default intensity is 1. Let's dim the light a small amount
         light.intensity = 0.7;
 
-        // let Wall = scene.getMeshByName('Wall');
-        // Wall.checkCollisions = true
+        let Wall = scene.getMeshByName('Wall');
+        Wall.checkCollisions = true
 
         //scene are ready
         scene.executeWhenReady(function(){
