@@ -53,18 +53,10 @@ window.addEventListener('DOMContentLoaded', ()=> {
             scene.onPointerObservable.add((pointerInfo) => {
                 switch (pointerInfo.type) {
                     case BABYLON.PointerEventTypes.POINTERDOWN:
-                        let pickInfo = pointerInfo.pickInfo
+                        pickInfo = pointerInfo.pickInfo
                         if (pickInfo.pickedMesh) {
                             //如果点击地板，则前进
-                            if (pickInfo.pickedMesh.name == 'Floor') {
-                                let pointX = pointerInfo.pickInfo.pickedPoint._x,
-                                    pointY = pointerInfo.pickInfo.pickedPoint._y,
-                                    pointZ = pointerInfo.pickInfo.pickedPoint._z
-                                
-                                var ease = new BABYLON.CubicEase();
-                                ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
-                                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position', 30, 120, camera.position,new BABYLON.Vector3(pointX, 1, pointZ), 0, ease, animEnd);
-                            } else if (pickInfo.pickedMesh.name && pickInfo.pickedMesh.name != 'Wall') {//点击mesh 对焦相机
+                            if (pickInfo.pickedMesh.name && pickInfo.pickedMesh.name != 'Wall' && pickInfo.pickedMesh.name != 'Floor') {//点击mesh 对焦相机
                                 // let targetMesh = pickInfo.pickedMesh
                                 // let targetPos = targetMesh.getAbsolutePosition();
                                 // var CoT = new BABYLON.TransformNode("renderCanvas"); 
@@ -136,6 +128,21 @@ window.addEventListener('DOMContentLoaded', ()=> {
                                 ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
                                 BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position', 30, 120, camera.position, new BABYLON.Vector3(targetPos._x, targetPos._y, targetPos._z), 0, ease, animEnd);
                                 BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation', 30, 120, camera.rotation, targetrot, 0, ease);
+                            }
+                        }
+                        break;
+                    case BABYLON.PointerEventTypes.POINTERDOUBLETAP:
+                        pickInfo = pointerInfo.pickInfo
+                        if (pickInfo.pickedMesh) {
+                            //如果点击地板，则前进
+                            if (pickInfo.pickedMesh.name == 'Floor') {
+                                let pointX = pointerInfo.pickInfo.pickedPoint._x,
+                                    pointY = pointerInfo.pickInfo.pickedPoint._y,
+                                    pointZ = pointerInfo.pickInfo.pickedPoint._z
+                                
+                                var ease = new BABYLON.CubicEase();
+                                ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
+                                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position', 30, 120, camera.position,new BABYLON.Vector3(pointX, 1, pointZ), 0, ease, animEnd);
                             }
                         }
                         break;
