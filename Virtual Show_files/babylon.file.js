@@ -23,6 +23,7 @@ window.addEventListener('DOMContentLoaded', () => {
     scene.executeWhenReady(function () {
       //create free camera
       camera = new BABYLON.UniversalCamera('UniversalCamera', new BABYLON.Vector3(-1, 1, 1), scene);
+      window.camera = camera
       camera.rotation.y = -Math.PI / 2;
       camera.fov = 1.33;
       camera.speed = 0.5;
@@ -115,6 +116,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 let rotationAngle = targetMesh.rotationQuaternion.toEulerAngles()
                 let angle = -rotationAngle.y % (2 * Math.PI) - Math.PI
                 let cameraMo = camera.rotation.y % (2 * Math.PI)
+                console.log('targetPos:', targetPos)
                 console.log('rotationAngle:', rotationAngle)
                 console.log('angle:', angle)
                 console.log('cameraMo:', cameraMo)
@@ -126,6 +128,26 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
 
                 console.log('result cameraMo:', cameraMo)
+
+                let _x, _z
+                let distance = 2
+
+                _x = targetPos.x - distance * Math.sin(rotationAngle.y)
+                _z = targetPos.z + distance * Math.cos(rotationAngle.y)
+
+                let _pos = {_x: _x, _y: targetPos.y, _z: _z}
+
+                console.log(_pos)
+
+                // camera.position.z = _pos._z
+                // camera.position.x = _pos._x
+                // camera.position.y = _pos._y
+
+                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position', 30, 120, camera.position, _pos, 0, ease, animEnd);
+                // BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position.x', 30, 120, camera.position.x, _pos.x, 0, ease, animEnd);
+                // BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position.y', 30, 120, camera.position.y, _pos.y, 0, ease, animEnd);
+                // BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position.z', 30, 120, camera.position.z, _pos.z, 0, ease, animEnd);
+
                 // if (Math.abs(rotationAngle.y.toFixed(2)) == Math.abs((Math.PI / 2).toFixed(2))) {
                 //   BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position.z', 30, 120, camera.position.z, targetPos.z, 0, ease, animEnd);
                 // } else if(Math.abs(rotationAngle.y.toFixed(2)) == Math.abs((Math.PI * 2).toFixed(2)) || rotationAngle.y == 0) {
