@@ -186,7 +186,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
                 tiledPane.rotation.x = rotationX
-                tiledPane.rotation.y = rotationY
+                tiledPane.rotation.y = -rotationY
                 tiledPane.rotation.z = rotationz
 
                 //console.log("========", tiledPane.rotation.x, tiledPane.rotation.y, tiledPane.rotation.z)
