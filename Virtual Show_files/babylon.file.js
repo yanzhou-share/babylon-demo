@@ -27,8 +27,15 @@ window.addEventListener('DOMContentLoaded', () => {
       camera.rotation.y = -Math.PI / 2;
       camera.fov = 1.33;
       camera.speed = 0.5;
+      camera.minZ = 0.05
+      camera.fovMode = BABYLON.Camera.FOVMODE_HORIZONTAL_FIXED
+      camera.fovMode = BABYLON.Camera.FOVMODE_VERTICAL_FIXED
       // camera.useAutoRotationBehavior = true;
 
+      camera.onCollide = function(collidedMesh) {//碰撞回调事件
+        console.log(collidedMesh)
+    }
+    
 
       // camera.inputs.addMouseWheel();
       // camera.setTarget(BABYLON.Vector3.Zero());
@@ -37,6 +44,15 @@ window.addEventListener('DOMContentLoaded', () => {
       scene.collisionsEnabled = true;
       scene.activeCamera.checkCollisions = true;
       scene.activeCamera.attachControl(canvas, true);
+
+
+      scene.registerBeforeRender(function () {
+        if(camera.rotation.x>0.1  ){
+          camera.rotation.x = 0.1;
+        }else if(camera.rotation.x<-0.1){
+          camera.rotation.x = -0.1;
+        }
+      })
 
       //绑定键盘
       if (scene.activeCamera.keysUp) {
@@ -89,9 +105,11 @@ window.addEventListener('DOMContentLoaded', () => {
       camera.ellipsoid = new BABYLON.Vector3(1, 1, 1)
 
 
+      initPlaceholder()//渲染占位
+
+
       //初始化摇杆
       // _initJoy()
-
       let getChildRotation = function (child) { //return the rotation of a child of a parent object by using a temporary World Matrix
         var scale = new BABYLON.Vector3(0, 0, 0);
         var rotation = new BABYLON.Quaternion();
@@ -143,7 +161,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 // camera.position.x = _pos._x
                 // camera.position.y = _pos._y
 
-                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position', 30, 120, camera.position, _pos, 0, ease, animEnd);
+                
                 // BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position.x', 30, 120, camera.position.x, _pos.x, 0, ease, animEnd);
                 // BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position.y', 30, 120, camera.position.y, _pos.y, 0, ease, animEnd);
                 // BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position.z', 30, 120, camera.position.z, _pos.z, 0, ease, animEnd);
@@ -158,6 +176,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
                 // BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position.z', 30, 120, camera.position.z, targetrot.z+3.6, 0, ease, animEnd);
                 BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation.y', 30, 120, cameraMo, angle, 0, ease);
+                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position', 30, 50, camera.position, _pos, 0, ease, animEnd);
               } else if (pickInfo.pickedMesh.name == 'Floor') {
                 mousedownFloor = true
               }
@@ -167,58 +186,99 @@ window.addEventListener('DOMContentLoaded', () => {
               let pickedMesh = (pointerInfo.pickInfo.pickedMesh)
 
               // console.log("============", pointerInfo.pickInfo.pickedPoint, pickedMesh.getAbsolutePosition())
+              let imgSrc = ""
+              let width = 0
+              let height = 0
+              let baseValue = 0.001
+              if(pickedMesh.rotationQuaternion.toEulerAngles().y/Math.PI == 0){
+                imgSrc = "placeholder_500*1000.jpg";
+                width = baseValue * 500
+                height = baseValue * 1000
+              }else if((pickedMesh.rotationQuaternion.toEulerAngles().y/Math.PI).toFixed(1) == 1){
+                imgSrc = "placeholder_1000*500.jpg";
+                width = baseValue * 1000
+                height = baseValue * 500
+              }else if((pickedMesh.rotationQuaternion.toEulerAngles().y/Math.PI).toFixed(1) == -0.5){
+                imgSrc = "placeholder_2000*2000.jpg"
+                width = baseValue * 2000
+                height = baseValue * 2000
+              }else{
+                imgSrc = "placeholder_2000*2000.jpg"
+                width = baseValue * 2000
+                height = baseValue * 2000
+              }
 
               let materialPlane = new BABYLON.StandardMaterial("texturePlane", scene);
-              materialPlane.diffuseTexture = new BABYLON.Texture("demo.png", scene)
-              materialPlane.specularTexture = new BABYLON.Texture("demo.png", scene)
-              materialPlane.emissiveTexture = new BABYLON.Texture("demo.png", scene)
-              materialPlane.ambientTexture = new BABYLON.Texture("demo.png", scene)
+              materialPlane.diffuseTexture = new BABYLON.Texture(imgSrc, scene)
+              materialPlane.specularTexture = new BABYLON.Texture(imgSrc, scene)
+              materialPlane.emissiveTexture = new BABYLON.Texture(imgSrc, scene)
+              materialPlane.ambientTexture = new BABYLON.Texture(imgSrc, scene)
 
-              // pickedMesh.scaling = new BABYLON.Vector3(1, 1, 1)
-              // materialPlane.diffuseTexture.uScale = 1.0
-              // materialPlane.diffuseTexture.vScale = 1.0
-              // materialPlane.fillMode = new BABYLON.Vector3(1, 1, 1);
+
               materialPlane.diffuseTexture.hasAlpha = true
-              // materialPlane.backFaceCulling = true
 
               // pickedMesh.setEnabled(false)
-              pickedMesh.visibility = 0
+
+              let tiledPane = BABYLON.MeshBuilder.CreatePlane("tiledPane", {width: width, height: height, updatable: false, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
+
+              tiledPane.position.x = pickedMesh.getAbsolutePosition().x
+              tiledPane.position.y = pickedMesh.getAbsolutePosition().y
+              tiledPane.position.z = pickedMesh.getAbsolutePosition().z
 
 
-              if(pickedMesh.tiledPane){
-                let selectPic = pickedMesh.tiledPane
-              }else{
-                let tiledPane = BABYLON.MeshBuilder.CreatePlane("tiledPane", {height: 0.5, width: 0.8, updatable: false, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
+              let rotationX =  pickedMesh.rotationQuaternion.toEulerAngles().x
+              let rotationY =  pickedMesh.rotationQuaternion.toEulerAngles().y + Math.PI
+              let rotationz =  pickedMesh.rotationQuaternion.toEulerAngles().z
 
 
-                tiledPane.position.x = pickedMesh.getAbsolutePosition().x
-                tiledPane.position.y = pickedMesh.getAbsolutePosition().y
-                tiledPane.position.z = pickedMesh.getAbsolutePosition().z
+              tiledPane.rotation.x = rotationX
+              tiledPane.rotation.y = -rotationY
+              tiledPane.rotation.z = rotationz
 
-                //
-                //tiledPane.renderingGroupId = 2//
-
-                // tiledPane.rotation.y = -Math.PI/2
-
-                let rotationX =  pickedMesh.rotationQuaternion.toEulerAngles().x
-                let rotationY =  pickedMesh.rotationQuaternion.toEulerAngles().y + Math.PI
-                let rotationz =  pickedMesh.rotationQuaternion.toEulerAngles().z
-
-                //console.log("========", rotationX, rotationY, rotationz)
-
-
-                tiledPane.rotation.x = rotationX
-                tiledPane.rotation.y = -rotationY
-                tiledPane.rotation.z = rotationz
-
-                //console.log("========", tiledPane.rotation.x, tiledPane.rotation.y, tiledPane.rotation.z)
-
-
+              if(pickedMesh.placeholder){
+                pickedMesh.placeholder.visibility = 0
                 tiledPane.material = materialPlane
-
-                pickedMesh.tiledPane = tiledPane
-
+                pickedMesh.placeholder.tiledPane = tiledPane
               }
+
+              // if(pickedMesh.tiledPane){
+              //   pickedMesh.tiledPane.material = materialPlane
+              // }
+
+
+              // if(pickedMesh.tiledPane){
+              //   let selectPic = pickedMesh.tiledPane
+              // }else{
+              //   let tiledPane = BABYLON.MeshBuilder.CreatePlane("tiledPane", {height: 0.5, width: 0.8, updatable: false, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
+              //
+              //
+              //   tiledPane.position.x = pickedMesh.getAbsolutePosition().x
+              //   tiledPane.position.y = pickedMesh.getAbsolutePosition().y
+              //   tiledPane.position.z = pickedMesh.getAbsolutePosition().z
+              //
+              //   //
+              //   //tiledPane.renderingGroupId = 2//
+              //
+              //   // tiledPane.rotation.y = -Math.PI/2
+              //
+              //   let rotationX =  pickedMesh.rotationQuaternion.toEulerAngles().x
+              //   let rotationY =  pickedMesh.rotationQuaternion.toEulerAngles().y + Math.PI
+              //   let rotationz =  pickedMesh.rotationQuaternion.toEulerAngles().z
+              //
+              //   //console.log("========", rotationX, rotationY, rotationz)
+              //
+              //
+              //   tiledPane.rotation.x = rotationX
+              //   tiledPane.rotation.y = -rotationY
+              //   tiledPane.rotation.z = rotationz
+              //
+              //   //console.log("========", tiledPane.rotation.x, tiledPane.rotation.y, tiledPane.rotation.z)
+              //
+              //
+              //   tiledPane.material = materialPlane
+              //
+              //   pickedMesh.tiledPane = tiledPane
+              // }
             }
 
             break;
@@ -246,7 +306,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
       });
 
-      var animEnd = function () {
+      let animEnd = function () {
 
       };
 
@@ -289,7 +349,38 @@ window.addEventListener('DOMContentLoaded', () => {
       function initPlaceholder(){
         scene.meshes.forEach((mesh) => {
           // console.log("mesh: ", mesh.name)
-          if(mesh.parent.name == ("placeholder")){
+          if(mesh.parent && mesh.parent.name == ("placeholder")){
+            let materialPlane = new BABYLON.StandardMaterial("texturePlane", scene);
+            materialPlane.diffuseTexture = new BABYLON.Texture("placeholder.jpg", scene)
+            materialPlane.specularTexture = new BABYLON.Texture("placeholder.jpg", scene)
+            materialPlane.emissiveTexture = new BABYLON.Texture("placeholder.jpg", scene)
+            materialPlane.ambientTexture = new BABYLON.Texture("placeholder.jpg", scene)
+
+            materialPlane.diffuseTexture.hasAlpha = true
+            mesh.visibility = 0
+
+            let tiledPane = BABYLON.MeshBuilder.CreatePlane("tiledPane", {height: 0.5, width: 0.5, updatable: false, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene)
+            tiledPane.position.x = mesh.getAbsolutePosition().x
+            tiledPane.position.y = mesh.getAbsolutePosition().y
+            tiledPane.position.z = mesh.getAbsolutePosition().z
+
+
+            let rotationX =  mesh.rotationQuaternion.toEulerAngles().x
+            let rotationY =  mesh.rotationQuaternion.toEulerAngles().y + Math.PI
+            let rotationz =  mesh.rotationQuaternion.toEulerAngles().z
+
+            //console.log("========", rotationX, rotationY, rotationz)
+
+
+            tiledPane.rotation.x = rotationX
+            tiledPane.rotation.y = -rotationY
+            tiledPane.rotation.z = rotationz
+
+            //console.log("========", tiledPane.rotation.x, tiledPane.rotation.y, tiledPane.rotation.z)
+
+            tiledPane.material = materialPlane
+
+            mesh.placeholder = tiledPane
 
           }
         });
