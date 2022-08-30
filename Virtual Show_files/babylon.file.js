@@ -7,9 +7,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
   var camera;
   var cameraHeight = 5;
+  var mousedownFloor = false
 
   //load babaylon or gltf
-  BABYLON.SceneLoader.Load('', 'demo90.glb', engine, function (newScene) {
+  BABYLON.SceneLoader.Load('', '45.glb', engine, function (newScene) {
     scene = newScene;
 
     // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
@@ -21,11 +22,12 @@ window.addEventListener('DOMContentLoaded', () => {
     //scene are ready
     scene.executeWhenReady(function () {
       //create free camera
-      camera = new BABYLON.FreeCamera('FreeCam', new BABYLON.Vector3(-1, 1, 1), scene, true);
+      camera = new BABYLON.UniversalCamera('UniversalCamera', new BABYLON.Vector3(-1, 1, 1), scene);
       camera.rotation.y = -Math.PI / 2;
       camera.fov = 1.33;
       camera.speed = 0.5;
       // camera.useAutoRotationBehavior = true;
+
 
       // camera.inputs.addMouseWheel();
       // camera.setTarget(BABYLON.Vector3.Zero());
@@ -48,7 +50,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
       scene.meshes.forEach((mesh) => {
         // console.log("mesh: ", mesh.name)
-        if(mesh.name.includes("Wall")){
+        if(mesh.parent && mesh.parent.name == "wall"){
           console.log("Wall: ", mesh.name)
           mesh.checkCollisions = true;
         }
@@ -76,10 +78,9 @@ window.addEventListener('DOMContentLoaded', () => {
           console.log("Metals: ", mesh.name)
           mesh.checkCollisions = true;
         }
-        // if(mesh.name.includes("Openings")){
-        //   console.log("Metals: ", mesh.name)
-        //   mesh.checkCollisions = true;
-        // }
+        if(mesh.name.includes("Sofa")){
+          mesh.checkCollisions = true;
+        }
       });
 
       scene.collisionsEnabled = true
@@ -107,79 +108,36 @@ window.addEventListener('DOMContentLoaded', () => {
           case BABYLON.PointerEventTypes.POINTERDOWN:
             pickInfo = pointerInfo.pickInfo;
             if (pickInfo.pickedMesh) {
-              //如果点击地板，则前进
               if (pickInfo.pickedMesh && pickInfo.pickedMesh.parent && pointerInfo.pickInfo.pickedMesh.parent.name == ("placeholder")) {//点击mesh 对焦相机
-                // let targetMesh = pickInfo.pickedMesh
-                // let targetPos = targetMesh.getAbsolutePosition();
-                // var CoT = new BABYLON.TransformNode("renderCanvas");
-                // camera.lockedTarget = CoT
-
-                // var whereto = new BABYLON.Vector3(
-                //     pickInfo.pickedPoint.x,
-                //     pickInfo.pickedPoint.y,
-                //     pickInfo.pickedPoint.z - 30);//minus 10 to get infront of the mesh
-
-                // var wheretoTwo = new BABYLON.Vector3(
-                //     pickInfo.pickedPoint.x,
-                //     pickInfo.pickedPoint.y,
-                //     pickInfo.pickedPoint.z);//minus 10 to get infront of the mesh
-
-                // camera.setTarget(targetPos);
-
-                // var easingFunction = new BABYLON.BackEase(.0);
-                // easingFunction.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEIN);
-
-                // var animTwo = BABYLON.Animation.CreateAndStartAnimation("anim", CoT, "position", 300, 100, CoT.position, wheretoTwo, 2, easingFunction);
-                // var anim = BABYLON.Animation.CreateAndStartAnimation("anim", camera, "position", 30, 100, camera.position, whereto, 2, easingFunction);
-
                 let targetMesh = pickInfo.pickedMesh;
-                // camera.lockedTarget = targetMesh
-                // return
-
-                // scene.activeCamera.detachControl(canvas);
-                // targetMesh.setEnabled(false);
-
                 let targetPos = targetMesh.getAbsolutePosition();
-                console.log('元素绝对位置:', targetPos);
                 var targetrot = getChildRotation(targetMesh);
-                console.log('元素旋转位置:', targetrot);
-                targetrot.x = 0;
-                targetrot.y = targetrot.y;
-                targetrot.z = 0;
+                let rotationAngle = targetMesh.rotationQuaternion.toEulerAngles()
+                let angle = -rotationAngle.y % (2 * Math.PI) - Math.PI
+                let cameraMo = camera.rotation.y % (2 * Math.PI)
+                console.log('rotationAngle:', rotationAngle)
+                console.log('angle:', angle)
+                console.log('cameraMo:', cameraMo)
 
-                var ang1 = camera.rotation.y;
-                var ang2 = targetrot.y;
-                var angDiffT = ang2 - ang1;
+                if (Math.abs(angle - cameraMo) > Math.PI && (angle - cameraMo) <= 0) {
+                  cameraMo -= (2 * Math.PI)
+                } else if (Math.abs(angle - cameraMo) > Math.PI && (angle - cameraMo) > 0){
+                  cameraMo += (2 * Math.PI)
+                }
 
-                angDiffT %= Math.PI * 2;
-
-                if (angDiffT > Math.PI)
-                  angDiffT -= Math.PI * 2;
-                else if (angDiffT < -Math.PI)
-                  angDiffT += Math.PI * 2;
-
-                targetrot.y = ang1 + angDiffT;
-
-                // targetrot._y = -1.570796192436049
-                // targetrot._w = 0
-
-                console.log('计算之后:', targetrot);
-
-                // camera.rotation._y = -1.5707963267948966
-                // targetPos._x = -5.06572151184082
-                // targetPos._y = 0.8999999761581421
-                // targetPos._z = -1.0071661472320557
-                // camera.rotation._x = -camera.rotation._x
-                // console.log(targetrot)
-                // targetrot._y = -targetrot._y
-                // targetrot._x = -targetrot._x
-
-                console.log('相机旋转:', camera.rotation);
+                console.log('result cameraMo:', cameraMo)
+                // if (Math.abs(rotationAngle.y.toFixed(2)) == Math.abs((Math.PI / 2).toFixed(2))) {
+                //   BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position.z', 30, 120, camera.position.z, targetPos.z, 0, ease, animEnd);
+                // } else if(Math.abs(rotationAngle.y.toFixed(2)) == Math.abs((Math.PI * 2).toFixed(2)) || rotationAngle.y == 0) {
+                //   BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position.x', 30, 120, camera.position.x, targetPos.x, 0, ease, animEnd);
+                // }
 
                 var ease = new BABYLON.CubicEase();
                 ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
-                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position', 30, 120, camera.position, new BABYLON.Vector3(targetPos._x, targetPos._y, targetPos._z), 0, ease, animEnd);
-                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation', 30, 120, camera.rotation, targetrot, 0, ease);
+                // BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position.z', 30, 120, camera.position.z, targetrot.z+3.6, 0, ease, animEnd);
+                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation.y', 30, 120, cameraMo, angle, 0, ease);
+              } else if (pickInfo.pickedMesh.name == 'Floor') {
+                mousedownFloor = true
               }
             }
 
@@ -216,12 +174,12 @@ window.addEventListener('DOMContentLoaded', () => {
                 tiledPane.position.z = pickedMesh.getAbsolutePosition().z
 
                 //
-                tiledPane.renderingGroupId = 2//
+                //tiledPane.renderingGroupId = 2//
 
                 // tiledPane.rotation.y = -Math.PI/2
 
                 let rotationX =  pickedMesh.rotationQuaternion.toEulerAngles().x
-                let rotationY =  pickedMesh.rotationQuaternion.toEulerAngles().y + +Math.PI
+                let rotationY =  pickedMesh.rotationQuaternion.toEulerAngles().y + Math.PI
                 let rotationz =  pickedMesh.rotationQuaternion.toEulerAngles().z
 
                 //console.log("========", rotationX, rotationY, rotationz)
@@ -243,13 +201,17 @@ window.addEventListener('DOMContentLoaded', () => {
 
             break;
           case BABYLON.PointerEventTypes.POINTERDOUBLETAP:
+            break;
+          case BABYLON.PointerEventTypes.POINTERUP:
             pickInfo = pointerInfo.pickInfo;
             if (pickInfo.pickedMesh) {
               //如果点击地板，则前进
-              if (pickInfo.pickedMesh.name == 'Floor') {
+              if (pickInfo.pickedMesh.name == 'Floor' && mousedownFloor) {
                 let pointX = pointerInfo.pickInfo.pickedPoint._x,
                   pointY = pointerInfo.pickInfo.pickedPoint._y,
                   pointZ = pointerInfo.pickInfo.pickedPoint._z;
+
+                  mousedownFloor = false
 
                 var ease = new BABYLON.CubicEase();
                 ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
@@ -257,14 +219,13 @@ window.addEventListener('DOMContentLoaded', () => {
               }
             }
             break;
-          case BABYLON.PointerEventTypes.POINTERUP:
-            break;
           case BABYLON.PointerEventTypes.POINTERMOVE:
             break;
         }
       });
 
       var animEnd = function () {
+
       };
 
       function _initJoy() {
@@ -298,6 +259,16 @@ window.addEventListener('DOMContentLoaded', () => {
             scene.activeCamera.cameraRotation.y += rightJoyStick.deltaPosition.x * 0.005;
             scene.activeCamera.cameraRotation.x += rightJoyStick.deltaPosition.y * 0.005;
             // sphere.position.y+=rightJoyStick.deltaPosition.y
+          }
+        });
+      }
+
+      //初始化占位
+      function initPlaceholder(){
+        scene.meshes.forEach((mesh) => {
+          // console.log("mesh: ", mesh.name)
+          if(mesh.parent.name == ("placeholder")){
+
           }
         });
       }
