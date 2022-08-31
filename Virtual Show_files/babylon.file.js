@@ -1,4 +1,5 @@
 window.addEventListener('DOMContentLoaded', () => {
+  var divFps = document.getElementById("fps");
   var canvas = document.getElementById('renderCanvas');
   // load the 3D engine
   var engine = new BABYLON.Engine(canvas, true);
@@ -47,10 +48,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
       scene.registerBeforeRender(function () {
-        if(camera.rotation.x>0.1  ){
-          camera.rotation.x = 0.1;
-        }else if(camera.rotation.x<-0.1){
-          camera.rotation.x = -0.1;
+        if(camera.rotation.x>0  ){
+          camera.rotation.x = 0;
+        }else if(camera.rotation.x<0){
+          camera.rotation.x = 0;
         }
       })
 
@@ -73,7 +74,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         if(mesh.name.includes("Floor")){
           console.log("Floor: ", mesh.name)
-          // mesh.checkCollisions = true;
+          //mesh.checkCollisions = true;
         }
         if(mesh.name.includes("Plan")){
           console.log("Plan: ", mesh.name)
@@ -96,7 +97,10 @@ window.addEventListener('DOMContentLoaded', () => {
           mesh.checkCollisions = true;
         }
         if(mesh.name.includes("Sofa")){
-          mesh.checkCollisions = true;
+          //mesh.checkCollisions = true;
+        }
+        if(mesh.name.includes("Openings")){
+          mesh.checkCollisions = true
         }
       });
 
@@ -107,9 +111,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
       initPlaceholder()//渲染占位
 
-
       //初始化摇杆
-      // _initJoy()
+      _initJoy()
+
       let getChildRotation = function (child) { //return the rotation of a child of a parent object by using a temporary World Matrix
         var scale = new BABYLON.Vector3(0, 0, 0);
         var rotation = new BABYLON.Quaternion();
@@ -134,10 +138,6 @@ window.addEventListener('DOMContentLoaded', () => {
                 let rotationAngle = targetMesh.rotationQuaternion.toEulerAngles()
                 let angle = -rotationAngle.y % (2 * Math.PI) - Math.PI
                 let cameraMo = camera.rotation.y % (2 * Math.PI)
-                console.log('targetPos:', targetPos)
-                console.log('rotationAngle:', rotationAngle)
-                console.log('angle:', angle)
-                console.log('cameraMo:', cameraMo)
 
                 if (Math.abs(angle - cameraMo) > Math.PI && (angle - cameraMo) <= 0) {
                   cameraMo -= (2 * Math.PI)
@@ -155,28 +155,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
                 let _pos = {_x: _x, _y: targetPos.y, _z: _z}
 
-                console.log(_pos)
-
-                // camera.position.z = _pos._z
-                // camera.position.x = _pos._x
-                // camera.position.y = _pos._y
-
-                
-                // BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position.x', 30, 120, camera.position.x, _pos.x, 0, ease, animEnd);
-                // BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position.y', 30, 120, camera.position.y, _pos.y, 0, ease, animEnd);
-                // BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position.z', 30, 120, camera.position.z, _pos.z, 0, ease, animEnd);
-
-                // if (Math.abs(rotationAngle.y.toFixed(2)) == Math.abs((Math.PI / 2).toFixed(2))) {
-                //   BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position.z', 30, 120, camera.position.z, targetPos.z, 0, ease, animEnd);
-                // } else if(Math.abs(rotationAngle.y.toFixed(2)) == Math.abs((Math.PI * 2).toFixed(2)) || rotationAngle.y == 0) {
-                //   BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position.x', 30, 120, camera.position.x, targetPos.x, 0, ease, animEnd);
-                // }
-
                 var ease = new BABYLON.CubicEase();
                 ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
-                // BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position.z', 30, 120, camera.position.z, targetrot.z+3.6, 0, ease, animEnd);
-                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation.y', 30, 120, cameraMo, angle, 0, ease);
+                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation.x', 30, 50, camera.rotation.x, 0, 0, ease);
+                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation.z', 30, 50, camera.rotation.z, 0, 0, ease);
+                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation.y', 30, 50, cameraMo, angle, 0, ease);
                 BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position', 30, 50, camera.position, _pos, 0, ease, animEnd);
+                camera.rotation.x =0
+                camera.rotation.z =0
               } else if (pickInfo.pickedMesh.name == 'Floor') {
                 mousedownFloor = true
               }
@@ -221,10 +207,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
               let tiledPane = BABYLON.MeshBuilder.CreatePlane("tiledPane", {width: width, height: height, updatable: false, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
 
-              tiledPane.position.x = pickedMesh.getAbsolutePosition().x
-              tiledPane.position.y = pickedMesh.getAbsolutePosition().y
-              tiledPane.position.z = pickedMesh.getAbsolutePosition().z
+              let rotationAngle = pickedMesh.rotationQuaternion.toEulerAngles()
 
+              tiledPane.position.x = pickedMesh.getAbsolutePosition().x + 0.25 * Math.sin(rotationAngle.y) //pickedMesh.getAbsolutePosition().x
+              tiledPane.position.y = pickedMesh.getAbsolutePosition().y
+              tiledPane.position.z = pickedMesh.getAbsolutePosition().z - 0.25 * Math.cos(rotationAngle.y)//pickedMesh.getAbsolutePosition().z
 
               let rotationX =  pickedMesh.rotationQuaternion.toEulerAngles().x
               let rotationY =  pickedMesh.rotationQuaternion.toEulerAngles().y + Math.PI
@@ -283,6 +270,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
             break;
           case BABYLON.PointerEventTypes.POINTERDOUBLETAP:
+            console.log(camera.getTarget())
+            console.log(camera.getFrontPosition(1))
             break;
           case BABYLON.PointerEventTypes.POINTERUP:
             pickInfo = pointerInfo.pickInfo;
@@ -312,7 +301,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
       function _initJoy() {
         let leftJoyStick = new BABYLON.VirtualJoystick(true, {
-          alwaysVisible: true,
+          alwaysVisible: false,
           position: {x: 100, y: 500},
           // puckImage:"http://192.168.50.184:8000/Bake.jpg"
         });
@@ -388,6 +377,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
       engine.runRenderLoop(function () {
         scene.render();
+        divFps.innerHTML = engine.getFps()
+          .toFixed() + " fps";
       });
     });
 
