@@ -30,11 +30,11 @@ window.addEventListener('DOMContentLoaded', () => {
       camera = new BABYLON.UniversalCamera('UniversalCamera', new BABYLON.Vector3(-1, 1, 1), scene);
       window.camera = camera
       camera.rotation.y = -Math.PI / 2;
-      camera.fov = 1.33;
+      camera.fov = 0.9;
       camera.speed = 0.5;
       camera.minZ = 0.05
-      camera.fovMode = BABYLON.Camera.FOVMODE_HORIZONTAL_FIXED
-      camera.fovMode = BABYLON.Camera.FOVMODE_VERTICAL_FIXED
+      // camera.fovMode = BABYLON.Camera.FOVMODE_HORIZONTAL_FIXED
+      // camera.fovMode = BABYLON.Camera.FOVMODE_VERTICAL_FIXED
       // camera.useAutoRotationBehavior = true;
       // camera.applyGravity = true
 
