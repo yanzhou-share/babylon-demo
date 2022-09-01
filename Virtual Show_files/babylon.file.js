@@ -13,6 +13,7 @@ window.addEventListener('DOMContentLoaded', () => {
   var mouseDownFlag = false
   var mouseMove = false
   let selectExhibit = null
+  let selectMesh = null
 
   //load babaylon or gltf
   BABYLON.SceneLoader.Load('', '45.glb', engine, function (newScene) {
@@ -51,6 +52,14 @@ window.addEventListener('DOMContentLoaded', () => {
       scene.activeCamera.checkCollisions = true;
       scene.activeCamera.attachControl(canvas, true);
 
+      scene.collisionsEnabled = true
+      camera.checkCollisions = true
+      // camera.ellipsoid = new BABYLON.Vector3(1, 1, 1)
+      camera.ellipsoidOffset = new BABYLON.Vector3(0, 1, 0);
+      scene.gravity = new BABYLON.Vector3(0, -0.15, 0)
+      camera.applyGravity = true;
+      camera._needMoveForGravity = true
+
 
       // scene.registerBeforeRender(function () {
       //   if(camera.rotation.x>0  ){
@@ -66,8 +75,6 @@ window.addEventListener('DOMContentLoaded', () => {
         scene.activeCamera.keysUp.push(87)
         scene.activeCamera.keysDown.push(83)
         scene.activeCamera.keysLeft.push(65)
-        // scene.activeCamera.keysLeft.push(81)
-        // scene.activeCamera.keysRight.push(69)
         scene.activeCamera.keysRight.push(68)
       }
 
@@ -85,22 +92,6 @@ window.addEventListener('DOMContentLoaded', () => {
           console.log("Plan: ", mesh.name)
           mesh.checkCollisions = true;
         }
-        if(mesh.name.includes("Curtain")){
-          console.log("Curtain: ", mesh.name)
-          mesh.checkCollisions = true;
-        }
-        if(mesh.name.includes("TitleWall")){
-          console.log("TitleWall: ", mesh.name)
-          mesh.checkCollisions = true;
-        }
-        if(mesh.name.includes("VideoWall")){
-          console.log("VideoWall: ", mesh.name)
-          mesh.checkCollisions = true;
-        }
-        if(mesh.name.includes("Metals")){
-          console.log("Metals: ", mesh.name)
-          mesh.checkCollisions = true;
-        }
         if(mesh.name.includes("Sofa")){
           mesh.checkCollisions = true;
         }
@@ -108,14 +99,6 @@ window.addEventListener('DOMContentLoaded', () => {
           mesh.checkCollisions = true
         }
       });
-
-      scene.collisionsEnabled = true
-      camera.checkCollisions = true
-      // camera.ellipsoid = new BABYLON.Vector3(1, 1, 1)
-      camera.ellipsoidOffset = new BABYLON.Vector3(0, 1, 0);
-      scene.gravity = new BABYLON.Vector3(0, -0.15, 0)
-      camera.applyGravity = true;
-      camera._needMoveForGravity = true
 
 
       initPlaceholder()//渲染占位
@@ -142,11 +125,14 @@ window.addEventListener('DOMContentLoaded', () => {
             mouseMove = false
             pickInfo = pointerInfo.pickInfo;
             if (pickInfo.pickedMesh) {
-              if (pickInfo.pickedMesh && pickInfo.pickedMesh.parent && pointerInfo.pickInfo.pickedMesh.parent.name == ("placeholder")) {//点击mesh 对焦相机
+              if (pickInfo.pickedMesh && (pickInfo.pickedMesh.name.includes("exhibit_") || (pickInfo.pickedMesh.parent && pointerInfo.pickInfo.pickedMesh.parent.name == ("placeholder")))) {//点击mesh 对焦相机
                 let targetMesh = pickInfo.pickedMesh;
                 let targetPos = targetMesh.getAbsolutePosition();
                 var targetrot = getChildRotation(targetMesh);
-                let rotationAngle = targetMesh.rotationQuaternion.toEulerAngles()
+                let rotationAngle = pickInfo.pickedMesh.name.includes("exhibit_") ? targetMesh.rotation.clone() : targetMesh.rotationQuaternion.toEulerAngles()
+                if(pickInfo.pickedMesh.name.includes("exhibit_")){
+                  rotationAngle.y = -rotationAngle.y - Math.PI
+                }
                 let angle = -rotationAngle.y % (2 * Math.PI) - Math.PI
                 let cameraMo = camera.rotation.y % (2 * Math.PI)
 
@@ -160,18 +146,26 @@ window.addEventListener('DOMContentLoaded', () => {
 
                 let _x, _z
                 let distance = 2
-
+                if(pickInfo.pickedMesh.parent && pickInfo.pickedMesh.parent.name == ("placeholder")){
+                  distance = distance - 0.25
+                }
                 _x = targetPos.x - distance * Math.sin(rotationAngle.y)
                 _z = targetPos.z + distance * Math.cos(rotationAngle.y)
 
+
                 let _pos = {_x: _x, _y: targetPos.y - 0.25, _z: _z}
+
 
                 var ease = new BABYLON.CubicEase();
                 ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
                 BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation.x', 30, 50, camera.rotation.x, 0, 0, ease);
                 BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation.z', 30, 50, camera.rotation.z, 0, 0, ease);
                 BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation.y', 30, 50, cameraMo, angle, 0, ease);
-                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position', 30, 50, camera.position, _pos, 0, ease, animEnd(pickInfo.pickedMesh));
+                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position', 30, 50, camera.position, _pos, 0, ease, ()=>{
+                  if(!pickInfo.pickedMesh.name.includes("exhibit_")){
+                    animEnd(pickInfo.pickedMesh)
+                  }
+                });
                 // camera.rotation.x =0
                 // camera.rotation.z =0
 
@@ -221,7 +215,7 @@ window.addEventListener('DOMContentLoaded', () => {
             if(mouseDownFlag) mouseMove = true
             break;
           case BABYLON.PointerEventTypes.POINTERWHEEL:
-            console.log("POINTER WHEEL");
+            // console.log("POINTER WHEEL");
             if (pointerInfo.event.wheelDelta) {
               if (pointerInfo.event.wheelDelta > 0) { //当鼠标滚轮向上滚动时
                 zoomInPic()
@@ -238,6 +232,8 @@ window.addEventListener('DOMContentLoaded', () => {
               }
             }
             break;
+          case BABYLON.PointerEventTypes.POINTERPICK:
+            break;
         }
       });
 
@@ -245,7 +241,7 @@ window.addEventListener('DOMContentLoaded', () => {
         if(pickedMesh){
           setTimeout(()=>{
             insertPic(pickedMesh)//插入图片
-          }, 1500)
+          }, 1)
         }
       };
 
@@ -322,7 +318,7 @@ window.addEventListener('DOMContentLoaded', () => {
             materialPlane.diffuseTexture.hasAlpha = true
             mesh.visibility = 0
 
-            let tiledPane = BABYLON.MeshBuilder.CreatePlane("tiledPane", {height: 0.5, width: 0.5, updatable: false, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene)
+            let tiledPane = BABYLON.MeshBuilder.CreatePlane("placeholder", {height: 0.5, width: 0.5, updatable: false, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene)
             let rotationAngle = mesh.rotationQuaternion.toEulerAngles()
 
             tiledPane.position.x = mesh.getAbsolutePosition().x + 0.25 * Math.sin(rotationAngle.y)
@@ -350,6 +346,9 @@ window.addEventListener('DOMContentLoaded', () => {
         });
       }
 
+      function randomRange(min, max) {
+        return Math.floor(Math.random() * (max - min)) + min;
+      }
 
       function insertPic(pickedMesh){
         let imgSrc = ""
@@ -385,13 +384,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
         // pickedMesh.setEnabled(false)
 
-        let tiledPane = BABYLON.MeshBuilder.CreatePlane("tiledPane", {width: width, height: height, updatable: false, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
+        let tiledPane = BABYLON.MeshBuilder.CreatePlane("exhibit_" + randomRange(1,1000), {width: width, height: height, updatable: false, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
 
         let rotationAngle = pickedMesh.rotationQuaternion.toEulerAngles()
 
         tiledPane.position.x = pickedMesh.getAbsolutePosition().x + 0.25 * Math.sin(rotationAngle.y) //pickedMesh.getAbsolutePosition().x
         tiledPane.position.y = pickedMesh.getAbsolutePosition().y
         tiledPane.position.z = pickedMesh.getAbsolutePosition().z - 0.25 * Math.cos(rotationAngle.y)//pickedMesh.getAbsolutePosition().z
+
+
 
         let rotationX =  pickedMesh.rotationQuaternion.toEulerAngles().x
         let rotationY =  pickedMesh.rotationQuaternion.toEulerAngles().y + Math.PI
@@ -406,7 +407,7 @@ window.addEventListener('DOMContentLoaded', () => {
           pickedMesh.placeholder.visibility = 0
           tiledPane.material = materialPlane
           pickedMesh.placeholder.tiledPane = tiledPane
-          selectExhibit = pickedMesh
+          selectMesh = pickedMesh
           let exhibitData = {}
           exhibitData.id = sceneId + "_" + pickedMesh.uniqueId
           exhibitData.rotation = {x: tiledPane.rotation.x, y: tiledPane.rotation.y, z: tiledPane.rotation.z}
@@ -456,16 +457,20 @@ window.addEventListener('DOMContentLoaded', () => {
       }
 
       function zoomInPic(){
-        if(selectExhibit){
-          let tiledPane = selectExhibit.placeholder.tiledPane
-          tiledPane.scaling = new BABYLON.Vector3(tiledPane.scaling.x + 0.1, tiledPane.scaling.y+0.1)
+        if(selectMesh){
+          let tiledPane = selectMesh.placeholder.tiledPane
+          let scalingX  = tiledPane.scaling.x < 5 ? tiledPane.scaling.x + 0.1 : 5
+          let scalingY = tiledPane.scaling.y < 5 ? tiledPane.scaling.y + 0.1 : 5
+          tiledPane.scaling = new BABYLON.Vector3(scalingX, scalingY, tiledPane.scaling.z)
         }
       }
 
       function zoomOutPic(){
-        if(selectExhibit){
-          let tiledPane = selectExhibit.placeholder.tiledPane
-          tiledPane.scaling = new BABYLON.Vector3(tiledPane.scaling.x - 0.1, tiledPane.scaling.y - 0.1)
+        if(selectMesh){
+          let tiledPane = selectMesh.placeholder.tiledPane
+          let scalingX  = tiledPane.scaling.x > 0.1 ? tiledPane.scaling.x - 0.1 : 0.1
+          let scalingY = tiledPane.scaling.y > 0.1 ? tiledPane.scaling.y - 0.1 : 0.1
+          tiledPane.scaling = new BABYLON.Vector3(scalingX, scalingY, tiledPane.scaling.z)
         }
       }
 
@@ -477,9 +482,9 @@ window.addEventListener('DOMContentLoaded', () => {
             break;
           case BABYLON.KeyboardEventTypes.KEYUP:
             //console.log("KEY UP: ", kbInfo.event.keyCode, kbInfo.event.key)
-            if(selectExhibit && kbInfo.event.key == "Backspace"){
-              let tiledPane = selectExhibit.placeholder.tiledPane
-              let placeholder = selectExhibit.placeholder
+            if(selectMesh && kbInfo.event.key == "Backspace"){
+              let tiledPane = selectMesh.placeholder.tiledPane
+              let placeholder = selectMesh.placeholder
               tiledPane.visibility = 0
               placeholder.visibility = 1
             }
