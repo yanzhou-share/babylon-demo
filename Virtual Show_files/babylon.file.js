@@ -30,8 +30,8 @@ window.addEventListener('DOMContentLoaded', () => {
       camera = new BABYLON.UniversalCamera('UniversalCamera', new BABYLON.Vector3(-1, 1, 1), scene);
       window.camera = camera
       camera.rotation.y = -Math.PI / 2;
-      camera.fov = 0.9;
-      camera.speed = 0.5;
+      camera.fov = 1.33
+      camera.speed = 0.2;
       camera.minZ = 0.05
       // camera.fovMode = BABYLON.Camera.FOVMODE_HORIZONTAL_FIXED
       // camera.fovMode = BABYLON.Camera.FOVMODE_VERTICAL_FIXED
@@ -66,8 +66,8 @@ window.addEventListener('DOMContentLoaded', () => {
         scene.activeCamera.keysUp.push(87)
         scene.activeCamera.keysDown.push(83)
         scene.activeCamera.keysLeft.push(65)
-        scene.activeCamera.keysLeft.push(81)
-        scene.activeCamera.keysRight.push(69)
+        // scene.activeCamera.keysLeft.push(81)
+        // scene.activeCamera.keysRight.push(69)
         scene.activeCamera.keysRight.push(68)
       }
 
@@ -139,6 +139,7 @@ window.addEventListener('DOMContentLoaded', () => {
         switch (pointerInfo.type) {
           case BABYLON.PointerEventTypes.POINTERDOWN:
             mouseDownFlag = true
+            mouseMove = false
             pickInfo = pointerInfo.pickInfo;
             if (pickInfo.pickedMesh) {
               if (pickInfo.pickedMesh && pickInfo.pickedMesh.parent && pointerInfo.pickInfo.pickedMesh.parent.name == ("placeholder")) {//点击mesh 对焦相机
@@ -163,7 +164,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 _x = targetPos.x - distance * Math.sin(rotationAngle.y)
                 _z = targetPos.z + distance * Math.cos(rotationAngle.y)
 
-                let _pos = {_x: _x, _y: targetPos.y, _z: _z}
+                let _pos = {_x: _x, _y: targetPos.y - 0.25, _z: _z}
 
                 var ease = new BABYLON.CubicEase();
                 ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
@@ -171,8 +172,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation.z', 30, 50, camera.rotation.z, 0, 0, ease);
                 BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation.y', 30, 50, cameraMo, angle, 0, ease);
                 BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position', 30, 50, camera.position, _pos, 0, ease, animEnd(pickInfo.pickedMesh));
-                camera.rotation.x =0
-                camera.rotation.z =0
+                // camera.rotation.x =0
+                // camera.rotation.z =0
 
               } else if (pickInfo.pickedMesh.name == 'Floor') {
                 mousedownFloor = true
@@ -209,8 +210,10 @@ window.addEventListener('DOMContentLoaded', () => {
                 var ease = new BABYLON.CubicEase();
                 ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
                 BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position', 30, 120, camera.position, new BABYLON.Vector3(pointX, 1, pointZ), 0, ease, animEnd);
-                camera.rotation.x =0
-                camera.rotation.z =0
+                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation.x', 30, 50, camera.rotation.x, 0, 0, ease);
+                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation.z', 30, 50, camera.rotation.z, 0, 0, ease);
+                // camera.rotation.x =0
+                // camera.rotation.z =0
               }
             }
             break;
@@ -248,12 +251,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
       function _initJoy() {
         var height = document.body.offsetHeight, width = document.body.offsetWidth
-        console.log(width, height)
+
         let leftJoyStick = new BABYLON.VirtualJoystick(true, {
           containerSize: 100,
-          alwaysVisible: true,
+          alwaysVisible: false,
           position: {x: width / 2 - 50, y: height - 250},
-          limitToContainer: true
+          limitToContainer: true,
+          reverseLeftRight: true,
+          reverseUpDown: true
           // puckImage:"http://192.168.50.184:8000/Bake.jpg"
         });
 
@@ -280,7 +285,6 @@ window.addEventListener('DOMContentLoaded', () => {
               //前进
               let moveX = leftJoyStick.deltaPosition.x * 0.005;
               let moveY = leftJoyStick.deltaPosition.y * 0.005;
-              console.log(moveX, moveY)
               cameraPosition = BABYLON.Vector3.TransformCoordinates(new BABYLON.Vector3(moveX, 0, moveY), BABYLON.Matrix.RotationY(scene.activeCamera.rotation.y));
               scene.activeCamera.cameraDirection.addInPlace(cameraPosition);
               // camera.position.x -= Math.abs(x) * moveSpeed
@@ -402,7 +406,7 @@ window.addEventListener('DOMContentLoaded', () => {
           pickedMesh.placeholder.visibility = 0
           tiledPane.material = materialPlane
           pickedMesh.placeholder.tiledPane = tiledPane
-          selectExhibit = tiledPane
+          selectExhibit = pickedMesh
           let exhibitData = {}
           exhibitData.id = sceneId + "_" + pickedMesh.uniqueId
           exhibitData.rotation = {x: tiledPane.rotation.x, y: tiledPane.rotation.y, z: tiledPane.rotation.z}
@@ -453,13 +457,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
       function zoomInPic(){
         if(selectExhibit){
-          selectExhibit.scaling = new BABYLON.Vector3(selectExhibit.scaling.x + 0.1, selectExhibit.scaling.y+0.1)
+          let tiledPane = selectExhibit.placeholder.tiledPane
+          tiledPane.scaling = new BABYLON.Vector3(tiledPane.scaling.x + 0.1, tiledPane.scaling.y+0.1)
         }
       }
 
       function zoomOutPic(){
         if(selectExhibit){
-          selectExhibit.scaling = new BABYLON.Vector3(selectExhibit.scaling.x - 0.1, selectExhibit.scaling.y - 0.1)
+          let tiledPane = selectExhibit.placeholder.tiledPane
+          tiledPane.scaling = new BABYLON.Vector3(tiledPane.scaling.x - 0.1, tiledPane.scaling.y - 0.1)
         }
       }
 
@@ -470,7 +476,13 @@ window.addEventListener('DOMContentLoaded', () => {
             //console.log("KEY DOWN: ", kbInfo.event.key);
             break;
           case BABYLON.KeyboardEventTypes.KEYUP:
-            //console.log("KEY UP: ", kbInfo.event.keyCode);
+            //console.log("KEY UP: ", kbInfo.event.keyCode, kbInfo.event.key)
+            if(selectExhibit && kbInfo.event.key == "Backspace"){
+              let tiledPane = selectExhibit.placeholder.tiledPane
+              let placeholder = selectExhibit.placeholder
+              tiledPane.visibility = 0
+              placeholder.visibility = 1
+            }
             break;
         }
       });
