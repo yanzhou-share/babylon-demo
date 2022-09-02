@@ -16,14 +16,16 @@ window.addEventListener('DOMContentLoaded', () => {
   let selectMesh = null
 
   //load babaylon or gltf
-  BABYLON.SceneLoader.Load('', '45.glb', engine, function (newScene) {
+  BABYLON.SceneLoader.Load('', 'buygallery-no-Light-placeholder-rename.glb', engine, function (newScene) {
     scene = newScene;
 
     // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
-    var light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
+    var light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 2, 15), scene);
+    var light2 = new BABYLON.HemisphericLight('light2', new BABYLON.Vector3(0, 10, 0), scene);
 
     // Default intensity is 1. Let's dim the light a small amount
     light.intensity = 0.7;
+    light2.intensity = 0.5;
 
     //scene are ready
     scene.executeWhenReady(function () {
@@ -31,8 +33,8 @@ window.addEventListener('DOMContentLoaded', () => {
       camera = new BABYLON.UniversalCamera('UniversalCamera', new BABYLON.Vector3(-1, 1, 1), scene);
       window.camera = camera
       camera.rotation.y = -Math.PI / 2;
-      camera.fov = 1.33
-      camera.speed = 0.2;
+      camera.fov = 0.9
+      camera.speed = 0.1;
       camera.minZ = 0.05
       // camera.fovMode = BABYLON.Camera.FOVMODE_HORIZONTAL_FIXED
       // camera.fovMode = BABYLON.Camera.FOVMODE_VERTICAL_FIXED
@@ -80,23 +82,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
       scene.meshes.forEach((mesh) => {
         // console.log("mesh: ", mesh.name)
-        if(mesh.parent && mesh.parent.name == "wall"){
-          console.log("Wall: ", mesh.name)
+        if(mesh.parent && mesh.parent.name == "collision"){
+          console.log("collision: ", mesh.name)
           mesh.checkCollisions = true;
         }
-        if(mesh.name.includes("Floor")){
-          console.log("Floor: ", mesh.name)
+        // if(mesh.name.includes("Floor")){
+        if(mesh.parent && mesh.parent.name == "floor"){
+          console.log("floor: ", mesh.name)
           mesh.checkCollisions = true;
-        }
-        if(mesh.name.includes("Plan")){
-          console.log("Plan: ", mesh.name)
-          mesh.checkCollisions = true;
-        }
-        if(mesh.name.includes("Sofa")){
-          mesh.checkCollisions = true;
-        }
-        if(mesh.name.includes("Openings")){
-          mesh.checkCollisions = true
         }
       });
 
@@ -104,7 +97,7 @@ window.addEventListener('DOMContentLoaded', () => {
       initPlaceholder()//渲染占位
 
       //初始化摇杆
-      if (isUserMobile()) _initJoy()
+      // if (isUserMobile()) _initJoy()
 
       let getChildRotation = function (child) { //return the rotation of a child of a parent object by using a temporary World Matrix
         var scale = new BABYLON.Vector3(0, 0, 0);
@@ -169,7 +162,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 // camera.rotation.x =0
                 // camera.rotation.z =0
 
-              } else if (pickInfo.pickedMesh.name == 'Floor') {
+              } else if (pickInfo.pickedMesh.parent.name == 'floor') {
                 mousedownFloor = true
               }
             }
@@ -193,21 +186,47 @@ window.addEventListener('DOMContentLoaded', () => {
             }
             pickInfo = pointerInfo.pickInfo;
             if (pickInfo.pickedMesh) {
+              // //如果点击地板，则前进
+              // if (pickInfo.pickedMesh.parent.name == 'floor' && mousedownFloor) {
+              //   let pointX = pointerInfo.pickInfo.pickedPoint._x,
+              //     pointY = pointerInfo.pickInfo.pickedPoint._y,
+              //     pointZ = pointerInfo.pickInfo.pickedPoint._z;
+
+              //     mousedownFloor = false
+
+              //   var ease = new BABYLON.CubicEase();
+              //   ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
+              //   BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position', 30, 120, camera.position, new BABYLON.Vector3(pointX, 1, pointZ), 0, ease, animEnd);
+              //   BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation.x', 30, 50, camera.rotation.x, 0, 0, ease);
+              //   BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation.z', 30, 50, camera.rotation.z, 0, 0, ease);
+              //   // camera.rotation.x =0
+              //   // camera.rotation.z =0
+              // }
+
               //如果点击地板，则前进
-              if (pickInfo.pickedMesh.name == 'Floor' && mousedownFloor) {
+              if (pickInfo.pickedMesh.parent.name == 'floor' && mousedownFloor) {
                 let pointX = pointerInfo.pickInfo.pickedPoint._x,
-                  pointY = pointerInfo.pickInfo.pickedPoint._y,
+                  // pointY = pointerInfo.pickInfo.pickedPoint._y,
+                  pointY = camera.position.y,
                   pointZ = pointerInfo.pickInfo.pickedPoint._z;
 
-                  mousedownFloor = false
+                  mousedownFloor = false;
 
+                var camEndPos;
+                var targetEndPos;
+                var speed = 45;
+                var frameCount = 200;
                 var ease = new BABYLON.CubicEase();
                 ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
-                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'position', 30, 120, camera.position, new BABYLON.Vector3(pointX, 1, pointZ), 0, ease, animEnd);
-                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation.x', 30, 50, camera.rotation.x, 0, 0, ease);
-                BABYLON.Animation.CreateAndStartAnimation('at5', camera, 'rotation.z', 30, 50, camera.rotation.z, 0, 0, ease);
-                // camera.rotation.x =0
-                // camera.rotation.z =0
+
+                var setCamLateralLeft = function() {
+                    camEndPos = new BABYLON.Vector3(pointX, pointY, pointZ);
+                    targetEndPos = new BABYLON.Vector3(pointX, pointY, pointZ);
+                    BABYLON.Animation.CreateAndStartAnimation('at1', camera, 'position', speed, frameCount, camera.position, camEndPos, 0, ease);
+                    BABYLON.Animation.CreateAndStartAnimation('at2', camera, 'target', speed, frameCount - 100, camera.target, targetEndPos, 0, ease);
+                };
+                
+                setCamLateralLeft();
               }
             }
             break;
