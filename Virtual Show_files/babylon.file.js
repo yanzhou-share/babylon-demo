@@ -16,6 +16,7 @@ window.addEventListener('DOMContentLoaded', () => {
   let selectMesh = null
   let framedepth = 0.06
   let veid = 'vec1fwten7'
+  var glbUrl = 'https://devrecord.imclass.cn/2magic-room-change-glass-box90-placeholder-ai-rename.glb'
 
   let veboothList = [
     {
@@ -49,7 +50,7 @@ window.addEventListener('DOMContentLoaded', () => {
 ]
 
   //load babaylon or gltf
-  BABYLON.SceneLoader.Load('', 'https://devrecord.imclass.cn/2magic-room-change-glass-box90-placeholder-ai-rename.glb', engine, function (newScene) {
+  BABYLON.SceneLoader.Load('', glbUrl, engine, function (newScene) {
     scene = newScene;
 
     // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
